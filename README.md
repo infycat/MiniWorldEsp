@@ -12,8 +12,6 @@
 
 [下載 Windows 執行檔（EXE）](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)
 
-EXE 與視窗使用的圖標資源位於 `assets/`；需要時可執行 `python tools/generate_icon.py` 重新產生。
-
 ## 功能一覽
 
 | 區域 | 功能 | 用途與可調整項目 |
