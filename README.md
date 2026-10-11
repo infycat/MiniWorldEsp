@@ -12,11 +12,7 @@
 
 [下載 Windows 執行檔（EXE）](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)
 
-## Icon 設計
-
-圖標用深藍底代表遊戲畫面與工具背景；中央線框立方體代表三維世界資料，青色準星代表螢幕投影與目標定位，外圈刻點暗示雷達。少量暖金色標記用來形成視覺焦點。整體採用簡單幾何線條，縮小後仍能辨識，並以 SVG 保留可縮放的原始設計。
-
-原始向量圖：[assets/mcp-esp-icon.svg](assets/mcp-esp-icon.svg)；512 px 預覽：[assets/mcp-esp-icon.png](assets/mcp-esp-icon.png)。Windows 多尺寸圖示由 [assets/mcp-esp-icon.ico](assets/mcp-esp-icon.ico) 嵌入 EXE，也用於 Overlay 視窗。要重新產生 PNG／ICO，可安裝 Pillow 後執行 `python tools/generate_icon.py`。
+EXE 與視窗使用的圖標資源位於 `assets/`；需要時可執行 `python tools/generate_icon.py` 重新產生。
 
 ## 功能一覽
 
