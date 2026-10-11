@@ -8,6 +8,10 @@ A Windows real-time visualization overlay sample built with C++20, Win32, Direct
 
 > **Data source:** In live mode, the C++ application reads a compatible MiniWorld process directly through read-only `ReadProcessMemory`. Cheat Engine MCP was used during development to inspect and verify data; it is not needed at runtime. `--data` and `--demo` load offline snapshots.
 
+## Download
+
+[Download the Windows executable (.exe)](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)
+
 ## Features
 
 | Area | What it does |

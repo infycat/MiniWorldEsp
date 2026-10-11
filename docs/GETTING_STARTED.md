@@ -92,7 +92,7 @@ cmake --build build-mingw --parallel
 
 | 檔案 / File | 說明 / Purpose |
 |---|---|
-| `dist/mcp_esp_overlay.exe` | 最終應用程式，包含 Windows 圖標。/ Final app with embedded Windows icon. |
+| `dist/mcp_esp_overlay.exe` | [下載 Windows 執行檔 / Download the Windows executable](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)，包含 Windows 圖標。/ Final app with embedded Windows icon. |
 | `dist/mcp-esp-ui.ini` | 主題選擇；執行時自動建立。/ Theme preference; created at runtime. |
 | `mcp-esp.ini` | Dear ImGui 視窗位置與版面設定。/ Dear ImGui window positions and layout. |
 | `logs/esp.log` | 限頻資料來源、讀取及繪圖診斷。/ Rate-limited source, read, and drawing diagnostics. |

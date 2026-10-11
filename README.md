@@ -8,6 +8,10 @@
 
 > **資料來源說明：**一般啟動時由 C++ 程式直接以唯讀 `ReadProcessMemory` 讀取相容版本的 MiniWorld 遊戲進程；執行時不需要 Cheat Engine MCP。CE MCP 曾用於開發時確認遊戲資料與函數。`--data` 和 `--demo` 則用於離線資料或示範。
 
+## 下載 / Download
+
+[下載 Windows 執行檔（EXE）](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)
+
 ## Icon 設計
 
 圖標用深藍底代表遊戲畫面與工具背景；中央線框立方體代表三維世界資料，青色準星代表螢幕投影與目標定位，外圈刻點暗示雷達。少量暖金色標記用來形成視覺焦點。整體採用簡單幾何線條，縮小後仍能辨識，並以 SVG 保留可縮放的原始設計。
@@ -143,7 +147,7 @@ cmake --build build --config Release
 
 MinGW 與 MSVC Release 都靜態連結 C++ 執行階段。發佈版不需要另外安裝 MinGW 或 VC++ Redistributable；其餘依賴是 Windows 10/11 系統元件。即時模式需要相容的 MiniWorld 客戶端正在執行；不同遊戲版本或記憶體佈局仍需重新驗證。樣本 JSON 只在使用 `--demo` 或 `--data` 時需要。
 
-本專案的單檔發佈版位於 [`dist/mcp_esp_overlay.exe`](dist/mcp_esp_overlay.exe)，可與源碼一同上傳。應用程式設定檔和 ImGui 視窗位置檔會在執行時建立，不應上傳。
+本專案的單檔發佈版可由上方下載連結取得；倉庫中的檔案位於 [`dist/mcp_esp_overlay.exe`](dist/mcp_esp_overlay.exe)。應用程式設定檔和 ImGui 視窗位置檔會在執行時建立，不應上傳。
 
 ## 快照格式
 
