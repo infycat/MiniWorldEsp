@@ -378,6 +378,21 @@ void drawEntity(ImDrawList* draw, const WorldSnapshot& w, const Entity& e,
         case EntityFilter::Distance: ++stats.filteredDistance; return;
         case EntityFilter::None: break;
     }
+    const bool player = e.kind == "player";
+    const bool creature = e.kind == "creature" || e.kind == "mob";
+    const bool object = e.kind == "object";
+    const EntityVisualOptions& visual = player ? s.playerVisual
+        : (creature ? s.creatureVisual : s.unknownVisual);
+    const bool showBox = object ? s.showObjectBox : (s.showBox && visual.box);
+    const bool showFill = object ? s.showObjectFill : (s.showBoxFill && visual.fill);
+    const bool showAntenna = !object && s.showAntenna && visual.antenna;
+    const bool showSkeleton = !object && s.showSkeleton && visual.skeleton;
+    const bool showName = object ? s.showObjectName : (s.showName && visual.name);
+    const bool showDistance = object ? s.showObjectDistance : (s.showDistance && visual.distance);
+    const bool showHealth = !object && s.showHealth && visual.health && e.health.has_value();
+    const float boxOpacity = object ? s.objectOpacity : s.boxOpacity;
+    const float fillOpacity = object ? s.objectFillOpacity : s.boxFillOpacity;
+    const float boxThickness = object ? s.objectThickness : s.boxThickness;
     const bool boundsReady = e.boundsAvailable;
     const bool matrixReady = matrixAvailable(w);
     if (!boundsReady) ++stats.missingBounds;
@@ -389,18 +404,18 @@ void drawEntity(ImDrawList* draw, const WorldSnapshot& w, const Entity& e,
         const auto point = worldToScreen(w, e.position, width, height);
         if (!point) { ++stats.clipped; return; }
         const auto& rgba = entityColor(w, e, s);
-        const ImU32 c = color(rgba, s.boxOpacity);
-        draw->AddCircleFilled(ImVec2(point->x, point->y), 4.0f, c, 12);
-        if (s.showAntenna) drawAntenna(draw, w, e, s, rgba, width, height);
+        const ImU32 c = color(rgba, boxOpacity);
+        if (showBox) draw->AddCircleFilled(ImVec2(point->x, point->y), 4.0f, c, 12);
+        if (showAntenna) drawAntenna(draw, w, e, s, rgba, width, height);
         const float dMeters = distance(e.position, w.cameraPosition) / std::max(1.0f, w.unitsPerMeter);
         const float distanceScale = 1.0f + std::clamp(dMeters / 100.0f, 0.0f, 0.75f);
         const float pointFontSize = std::round(std::clamp(14.0f * distanceScale, 14.0f, 28.0f));
         ImFont* textFont = ImGui::GetFont();
         const ImU32 textColor = color(rgba, s.textOpacity);
-        if (s.showName) drawOutlinedText(draw, textFont, pointFontSize,
+        if (showName) drawOutlinedText(draw, textFont, pointFontSize,
                                          ImVec2(point->x + 6.0f, point->y - 8.0f),
                                          textColor, e.name.c_str());
-        if (s.showDistance) {
+        if (showDistance) {
             char buf[32];
             std::snprintf(buf, sizeof(buf), " %.1fm", dMeters);
             drawOutlinedText(draw, textFont, pointFontSize, ImVec2(point->x + 6.0f, point->y + 8.0f),
@@ -420,7 +435,7 @@ void drawEntity(ImDrawList* draw, const WorldSnapshot& w, const Entity& e,
         // A target may have a valid projected center while its full bounds
         // fall outside the viewport. Keep the antenna useful in that case.
         const auto point = worldToScreen(w, e.position, width, height);
-        if (s.showAntenna && point) {
+        if (showAntenna && point) {
             const auto& rgba = entityColor(w, e, s);
             drawAntenna(draw, w, e, s, rgba, width, height);
         }
@@ -429,7 +444,7 @@ void drawEntity(ImDrawList* draw, const WorldSnapshot& w, const Entity& e,
     }
     const ImVec2 center((box.min.x + box.max.x) * 0.5f, (box.min.y + box.max.y) * 0.5f);
     const auto& rgba = entityColor(w, e, s);
-    const ImU32 edge = color(rgba, s.boxOpacity);
+    const ImU32 edge = color(rgba, boxOpacity);
 
     const bool use3dBox = s.use3dBoxes;
     ImVec2 boxMin = box.min;
@@ -439,27 +454,27 @@ void drawEntity(ImDrawList* draw, const WorldSnapshot& w, const Entity& e,
         boxMin = ImVec2(center.x - side * 0.5f, center.y - side * 0.5f);
         boxMax = ImVec2(center.x + side * 0.5f, center.y + side * 0.5f);
     }
-    if (s.showBoxFill) {
+    if (showFill) {
         if (use3dBox) {
-            const ImU32 fill = color(rgba, s.boxFillOpacity);
+            const ImU32 fill = color(rgba, fillOpacity);
             for (const auto& face : box.faces) if (face.size() >= 3)
                 draw->AddConvexPolyFilled(face.data(), static_cast<int>(face.size()), fill);
         } else {
-            draw->AddRectFilled(boxMin, boxMax, color(rgba, s.boxFillOpacity));
+            draw->AddRectFilled(boxMin, boxMax, color(rgba, fillOpacity));
         }
     }
-    if (s.showBox) {
+    if (showBox) {
         if (use3dBox) {
-            for (const auto& line : box.edges) draw->AddLine(line.first, line.second, edge, s.boxThickness);
+            for (const auto& line : box.edges) draw->AddLine(line.first, line.second, edge, boxThickness);
         } else {
-            draw->AddRect(boxMin, boxMax, edge, 0.0f, 0, s.boxThickness);
+            draw->AddRect(boxMin, boxMax, edge, 0.0f, 0, boxThickness);
         }
     }
 
-    if (s.showAntenna) {
+    if (showAntenna) {
         drawAntenna(draw, w, e, s, rgba, width, height);
     }
-    if (s.showSkeleton) {
+    if (showSkeleton) {
         if (!e.bones.empty()) {
             drawSkeletonProjected(draw, w, e, s, width, height);
         } else if (s.applyDefaultRigWhenMissing && w.demoData) {
@@ -473,12 +488,12 @@ void drawEntity(ImDrawList* draw, const WorldSnapshot& w, const Entity& e,
         }
     }
 
-    const bool drawHealth = e.kind != "object" && s.showHealth && e.health.has_value();
+    const bool drawHealth = showHealth;
     const bool drawHealthNumber = drawHealth && s.healthAsNumber;
     std::string label;
-    if (s.showName) label = e.name;
+    if (showName) label = e.name;
     const float d = distance(e.position, w.cameraPosition) / std::max(1.0f, w.unitsPerMeter);
-    if (s.showDistance) {
+    if (showDistance) {
         char buf[32]; std::snprintf(buf, sizeof(buf), "%s%.1fm", label.empty() ? "" : "  ", d);
         label += buf;
     }
@@ -617,7 +632,7 @@ DrawStats drawWorld(ImDrawList* draw, const WorldSnapshot& world, const Settings
             std::clamp(settings.entityCountX, 0.0f, std::max(0.0f, static_cast<float>(width) - 1.0f)),
             std::clamp(settings.entityCountY, 0.0f, std::max(0.0f, static_cast<float>(height) - 1.0f)));
         drawOutlinedText(draw, ImGui::GetFont(), std::clamp(settings.entityCountFontSize, 10.0f, 64.0f),
-                         position, color({1,1,1,1}, settings.textOpacity), text, 1.5f);
+                         position, color(settings.entityCountColor, settings.textOpacity), text, 1.5f);
     }
     stats.playerEntities = static_cast<std::size_t>(playerCount);
     stats.creatureEntities = static_cast<std::size_t>(creatureCount);
@@ -681,7 +696,8 @@ RadarStats drawRadar(const WorldSnapshot& world, Settings& settings) {
     ImGui::SetNextWindowSizeConstraints(ImVec2(1.0f, 1.0f),
                                         ImVec2(std::max(1.0f, display.x),
                                                std::max(1.0f, display.y)));
-    ImGui::Begin("Radar", &settings.showRadar);
+    const bool chinese = settings.guiLanguage == 0;
+    ImGui::Begin(chinese ? "雷達###Radar" : "Radar###Radar", &settings.showRadar);
     settings.radarX = ImGui::GetWindowPos().x;
     settings.radarY = ImGui::GetWindowPos().y;
     const ImVec2 avail = ImGui::GetContentRegionAvail();
@@ -721,6 +737,7 @@ RadarStats drawRadar(const WorldSnapshot& world, Settings& settings) {
         }
     };
     for (const auto& o : world.objects) {
+        if (!settings.showRadarObjects) continue;
         if (settings.visibleOnly && o.visible && !*o.visible) { ++stats.objectsFiltered; continue; }
         if (settings.maxDistance > 0.0f &&
             distance(o.position, world.cameraPosition) / std::max(1.0f, world.unitsPerMeter) > settings.maxDistance) {
@@ -731,6 +748,11 @@ RadarStats drawRadar(const WorldSnapshot& world, Settings& settings) {
         ++stats.objectsPlotted;
     }
     for (const auto& e : world.entities) {
+        if (e.kind == "player" && !settings.showRadarPlayers) continue;
+        if ((e.kind == "creature" || e.kind == "mob") && !settings.showRadarCreatures) continue;
+        if (e.kind == "object" && !settings.showRadarObjects) continue;
+        if (e.kind != "player" && e.kind != "creature" && e.kind != "mob" &&
+            e.kind != "object" && !settings.showRadarUnknown) continue;
         if (entityFilter(world, e, settings) != EntityFilter::None) { ++stats.entitiesFiltered; continue; }
         plot(e.position, color(entityColor(world, e, settings)), false);
         ++stats.entitiesPlotted;
@@ -739,7 +761,7 @@ RadarStats drawRadar(const WorldSnapshot& world, Settings& settings) {
     d->AddTriangle(headingA, headingB, headingC, markerOutline, 3.0f);
     d->AddTriangleFilled(headingA, headingB, headingC, IM_COL32(255,220,80,255));
     if (!world.valid) {
-        const char* waiting = "Waiting for data";
+        const char* waiting = chinese ? "等待資料" : "Waiting for data";
         const ImVec2 textSize = ImGui::CalcTextSize(waiting);
         d->AddText(ImVec2(center.x - textSize.x * 0.5f, center.y + radius + 6.0f),
                    IM_COL32(210, 220, 235, 220), waiting);

@@ -563,6 +563,21 @@ void OverlayApp::renderGui(const WorldSnapshot& snapshot) {
             ImGui::SliderFloat(uiText(chinese, "骨架透明度", "Skeleton opacity"), &settings_.skeletonOpacity, 0.0f, 1.0f);
             ImGui::SliderFloat(uiText(chinese, "骨架線條粗細", "Skeleton thickness"), &settings_.skeletonThickness, 0.5f, 8.0f, "%.1f px");
             ImGui::Checkbox(uiText(chinese, "缺少骨骼時套用預設骨架（僅示範）", "Default rig when bones missing (demo only)"), &settings_.applyDefaultRigWhenMissing);
+            ImGui::SeparatorText(uiText(chinese, "各類目標的繪製項目", "Per-type drawing options"));
+            const auto drawTypeOptions = [&](const char* title, EntityVisualOptions& options) {
+                if (!ImGui::TreeNode(title)) return;
+                ImGui::Checkbox(uiText(chinese, "方框邊線##type", "Box outline##type"), &options.box);
+                ImGui::Checkbox(uiText(chinese, "填色##type", "Face fill##type"), &options.fill);
+                ImGui::Checkbox(uiText(chinese, "名稱##type", "Name##type"), &options.name);
+                ImGui::Checkbox(uiText(chinese, "距離##type", "Distance##type"), &options.distance);
+                ImGui::Checkbox(uiText(chinese, "血量##type", "Health##type"), &options.health);
+                ImGui::Checkbox(uiText(chinese, "天線##type", "Antenna##type"), &options.antenna);
+                ImGui::Checkbox(uiText(chinese, "骨架##type", "Skeleton##type"), &options.skeleton);
+                ImGui::TreePop();
+            };
+            drawTypeOptions(uiText(chinese, "玩家項目", "Player options"), settings_.playerVisual);
+            drawTypeOptions(uiText(chinese, "生物項目", "Creature options"), settings_.creatureVisual);
+            drawTypeOptions(uiText(chinese, "未分類目標項目", "Unknown actor options"), settings_.unknownVisual);
             ImGui::Checkbox(uiText(chinese, "目標數量", "Entity count"), &settings_.showEntityCount);
             if (settings_.showEntityCount) {
                 ImGui::SliderFloat(uiText(chinese, "數量字體大小", "Count text size"),
@@ -571,6 +586,7 @@ void OverlayApp::renderGui(const WorldSnapshot& snapshot) {
                                    &settings_.entityCountX, 0.0f, std::max(0.0f, width_ - 160.0f), "%.0f px");
                 ImGui::SliderFloat(uiText(chinese, "數量文字 Y 位置", "Count text Y position"),
                                    &settings_.entityCountY, 0.0f, std::max(0.0f, height_ - 24.0f), "%.0f px");
+                colorEdit(uiText(chinese, "數量文字顏色", "Count text color"), settings_.entityCountColor);
             }
             colorEdit(uiText(chinese, "玩家顏色", "Player color"), settings_.playerColor);
             colorEdit(uiText(chinese, "隊友顏色", "Friend color"), settings_.friendColor);
@@ -594,6 +610,12 @@ void OverlayApp::renderGui(const WorldSnapshot& snapshot) {
         }
         if (ImGui::BeginTabItem(uiText(chinese, "雷達", "Radar"))) {
             ImGui::Checkbox(uiText(chinese, "顯示雷達", "Radar"), &settings_.showRadar);
+            ImGui::SeparatorText(uiText(chinese, "雷達目標", "Radar targets"));
+            ImGui::Checkbox(uiText(chinese, "玩家標點", "Player markers"), &settings_.showRadarPlayers);
+            ImGui::Checkbox(uiText(chinese, "生物標點", "Creature markers"), &settings_.showRadarCreatures);
+            ImGui::Checkbox(uiText(chinese, "未分類目標標點", "Unknown actor markers"), &settings_.showRadarUnknown);
+            ImGui::Checkbox(uiText(chinese, "物件標點", "Object markers"), &settings_.showRadarObjects);
+            ImGui::Separator();
             ImGui::SliderFloat(uiText(chinese, "雷達半徑", "Radar radius"), &settings_.radarRadius, 40.0f, 240.0f, "%.0f px");
             ImGui::SliderFloat(uiText(chinese, "雷達範圍（米）", "Radar range (meters)"), &settings_.radarRange,
                                1.0f, 100000.0f, "%.0f m");
@@ -683,7 +705,9 @@ void OverlayApp::renderFrame() {
     if (ImGuiContext* context = ImGui::GetCurrentContext()) {
         for (ImGuiWindow* window : context->Windows) {
             if (!window || !window->WasActive) continue;
-            const bool isRadar = window->Name && std::strcmp(window->Name, "Radar") == 0;
+            const bool isRadar = window->Name &&
+                (std::strcmp(window->Name, "Radar") == 0 ||
+                 std::strstr(window->Name, "###Radar") != nullptr);
             const bool isPopup = (window->Flags & ImGuiWindowFlags_Popup) != 0;
             if (!isRadar && !isPopup) continue;
             const ImVec2 pos = window->Pos;

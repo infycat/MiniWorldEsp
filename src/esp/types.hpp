@@ -116,6 +116,16 @@ struct WorldSnapshot {
     bool valid = false;
 };
 
+struct EntityVisualOptions {
+    bool box = true;
+    bool fill = true;
+    bool name = true;
+    bool distance = true;
+    bool health = true;
+    bool antenna = true;
+    bool skeleton = true;
+};
+
 struct Settings {
     bool guiVisible = true;
     int guiTheme = 0; // 0 dark, 1 white/blue
@@ -149,9 +159,17 @@ struct Settings {
     bool use3dBoxes = true;
     bool visibleOnly = false; // unknown visibility remains visible
     bool showEntityCount = true;
+    EntityVisualOptions playerVisual{};
+    EntityVisualOptions creatureVisual{};
+    EntityVisualOptions unknownVisual{};
+    bool showRadarPlayers = true;
+    bool showRadarCreatures = true;
+    bool showRadarUnknown = true;
+    bool showRadarObjects = true;
     float entityCountFontSize = 20.0f;
     float entityCountX = 14.0f;
     float entityCountY = 12.0f;
+    std::array<float, 4> entityCountColor{1.0f, 1.0f, 1.0f, 1.0f};
     int antennaAnchor = 2;    // 0 top, 1 bottom, 2 screen center (Lua ESP default)
     int crosshairStyle = 0;   // 0 cross, 1 circle, 2 corners, 3 animated
 

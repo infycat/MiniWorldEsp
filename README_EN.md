@@ -21,9 +21,10 @@ A Windows real-time visualization overlay sample built with C++20, Win32, Direct
 | Labels and health | Displays names, distance, health bars, and optional health numbers beside the distance label. Missing health data is never fabricated. |
 | Antenna lines | Connects a selected screen anchor to the projected target position; opacity and width are adjustable. |
 | Skeletons | Draws source-provided bone positions and links. Live mode does not call in-game bone functions and will not synthesize live skeletons. Demo data can use a clearly marked generic rig. |
-| Entity count | Shows player, creature, unknown, and object totals with a black text outline; font size and screen X/Y position are adjustable. |
+| Entity count | Shows player, creature, unknown, and object totals with a black text outline; color, font size, and screen X/Y position are adjustable. |
+| Per-type ESP controls | Players, creatures, and unknown actors can independently toggle boxes, fills, names, distance, health, antenna lines, and skeletons. Global switches can still disable a feature for all types. |
 | Objects | Shows object boxes, face fills, names, and distance. Object styling can be adjusted separately. |
-| Radar | A draggable, position-adjustable 2D radar oriented by camera heading. It shows entities and objects around the local player. |
+| Radar | The radar title follows the selected GUI language. Player, creature, unknown-actor, and object markers can each be hidden independently; radius, range, and position are adjustable. |
 | Crosshair | Cross, circle, corner, or dynamic style; configurable size, gap, color, opacity, and thickness, plus an optional adjustable ring. |
 | GUI language and themes | Switch between Traditional Chinese and English, and between Dark and White + Blue themes. Choices are saved beside the executable. |
 | Diagnostics | The panel reports target and camera data age, update rate, matrices, entity counts, and draw skip reasons. `logs/esp.log` records rate-limited diagnostics. |
