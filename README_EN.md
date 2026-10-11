@@ -16,15 +16,16 @@ A Windows real-time visualization overlay sample built with C++20, Win32, Direct
 
 | Area | What it does |
 |---|---|
-| Entities | Filters players, creatures, and unknown actors; optional relation, visibility, and distance filters. Relation filtering is only reliable when the source supplies team and game-rule metadata. |
+| Entities | Filters players, creatures, and other actors; optional relation, visibility, and distance filters. Relation filtering is only reliable when the source supplies team and game-rule metadata. |
 | 2D / 3D boxes | Rectangular 2D outlines or 3D wireframe cubes, with independently adjustable color, opacity, face fill, and line width. Projected edges and faces are clipped against the view frustum. |
 | Labels and health | Displays names, distance, health bars, and optional health numbers beside the distance label. Missing health data is never fabricated. |
 | Antenna lines | Connects a selected screen anchor to the projected target position; opacity and width are adjustable. |
 | Skeletons | Draws source-provided bone positions and links. Live mode does not call in-game bone functions and will not synthesize live skeletons. Demo data can use a clearly marked generic rig. |
-| Entity count | Shows player, creature, unknown, and object totals with a black text outline; color, font size, and screen X/Y position are adjustable. |
-| Per-type ESP controls | Players, creatures, and unknown actors can independently toggle boxes, fills, names, distance, health, antenna lines, and skeletons. Global switches can still disable a feature for all types. |
+| Entity count | Shows player, creature, actor, and object totals with a black text outline; color, font size, and screen X/Y position are adjustable. |
+| Per-type ESP controls | Players, creatures, and other actors can independently toggle boxes, fills, names, distance, health, antenna lines, and skeletons. Global switches can still disable a feature for all types. |
 | Objects | Shows object boxes, face fills, names, and distance. Object styling can be adjusted separately. |
-| Radar | The radar title follows the selected GUI language. Player, creature, unknown-actor, and object markers can each be hidden independently; radius, range, and position are adjustable. |
+| Radar | The radar title follows the selected GUI language. Player, creature, other-actor, and object markers can each be hidden independently; radius, range, and position are adjustable. |
+| Launcher and localization | The executable opens a launcher first. Start ESP becomes unavailable while running and the Close ESP button stops the overlay. A single-instance guard prevents launching a second window; common internal labels such as `ClientItem123` are localized with the selected language. |
 | Crosshair | Cross, circle, corner, or dynamic style; configurable size, gap, color, opacity, and thickness, plus an optional adjustable ring. |
 | GUI language and themes | Switch between Traditional Chinese and English, and between Dark and White + Blue themes. Choices are saved beside the executable. |
 | Diagnostics | The panel reports target and camera data age, update rate, matrices, entity counts, and draw skip reasons. `logs/esp.log` records rate-limited diagnostics. |

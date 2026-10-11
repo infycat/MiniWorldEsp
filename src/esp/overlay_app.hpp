@@ -7,6 +7,7 @@
 #include <dcomp.h>
 #include <dxgi1_2.h>
 #include <windows.h>
+#include <atomic>
 #include <vector>
 
 namespace esp {
@@ -18,6 +19,7 @@ public:
     OverlayApp(const OverlayApp&) = delete;
     OverlayApp& operator=(const OverlayApp&) = delete;
     int run(HINSTANCE instance);
+    void requestStop() noexcept { stopRequested_.store(true); }
 
 private:
     static LRESULT CALLBACK windowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -48,6 +50,7 @@ private:
     ID3D11RenderTargetView* target_ = nullptr;
     UINT width_ = 0, height_ = 0;
     bool running_ = true;
+    std::atomic_bool stopRequested_{false};
     bool interactive_ = true;
     int appliedGuiTheme_ = -1;
     DrawStats drawStats_{};

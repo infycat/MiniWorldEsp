@@ -86,7 +86,9 @@ cmake --build build-mingw --parallel
 .\dist\mcp_esp_overlay.exe --data .\sample_data.json
 ```
 
-鍵盤操作：`Insert` 顯示／隱藏控制面板；`End` 離開。拖曳控制面板標題列或雷達標題列可以移動位置，位置會限制在遊戲視窗範圍內；雷達標題會跟隨介面語言切換。Settings 分頁可切換繁體中文／英文與深色／白藍主題，選擇會保存在 EXE 旁的 `mcp-esp-ui.ini`。Entities 分頁的「目標數量」可調文字大小、顏色與螢幕 X/Y 位置，並有黑色描邊。玩家、生物、未分類目標可在分類項目中獨立設定方框、填色、名稱、距離、血量、天線與骨架；Radar 分頁可各自隱藏玩家、生物、未分類目標及物件標點。即時模式每個繪圖影格更新相機矩陣，減少快速轉動時的方框延遲。/ Controls: press `Insert` to show or hide the panel and `End` to exit. Drag the panel title bar or radar title bar to move it; both stay inside the game window, and the radar title follows the selected language. The Settings tab switches between Traditional Chinese / English and Dark / White + Blue themes. Choices are saved in `mcp-esp-ui.ini` next to the executable. In Entities, enable Entity count to adjust its font size, color, and screen X/Y position; the text has a black outline. Players, creatures, and unknown actors have independent toggles for boxes, fills, names, distance, health, antenna lines, and skeletons. The Radar tab can independently hide player, creature, unknown-actor, and object markers. Live mode refreshes camera matrices every render frame to reduce box lag during fast turns.
+EXE 啟動後會先顯示控制台。點「開啟 ESP」啟動繪製；運行期間開啟按鈕會停用，只能用「關閉 ESP」停止。若再次啟動 EXE，程式會提示已有一個實例開啟。/ The executable first opens a launcher. Select **Start ESP** to begin; while it is running, Start is disabled and **Close ESP** stops the overlay. Starting another copy displays an already-running notice.
+
+鍵盤操作：`Insert` 顯示／隱藏控制面板；`End` 關閉 ESP。拖曳控制面板標題列或雷達標題列可以移動位置，位置會限制在遊戲視窗範圍內；雷達標題會跟隨介面語言切換。Settings 分頁可切換繁體中文／英文與深色／白藍主題，選擇會保存在 EXE 旁的 `mcp-esp-ui.ini`。Entities 分頁的「目標數量」可調文字大小、顏色與螢幕 X/Y 位置，並有黑色描邊。玩家、生物、其他實體可在分類項目中獨立設定方框、填色、名稱、距離、血量、天線與骨架；Radar 分頁可各自隱藏玩家、生物、其他實體及物件標點。常見內部名稱會依語言翻譯，例如 `ClientItem123` 會顯示為「客戶端物品123」。即時模式每個繪圖影格更新相機矩陣，減少快速轉動時的方框延遲。/ Press `Insert` to show or hide the control panel and `End` to stop ESP. Drag the panel or radar title bar to move them; their positions stay within the game window, and the radar title follows the GUI language. Settings switches Traditional Chinese / English and Dark / White + Blue themes, saved beside the executable in `mcp-esp-ui.ini`. In Entities, Entity count has adjustable size, color, and screen X/Y position with a black outline. Players, creatures, and other actors have independent controls for boxes, fills, names, distance, health, antenna lines, and skeletons. Radar markers can be hidden separately by category. Common internal labels are localized, such as `ClientItem123` becoming “客戶端物品123” in Chinese. Live mode refreshes camera matrices every render frame to reduce box lag during fast turns.
 
 ## 6. 執行時檔案 / Runtime files
 
@@ -116,7 +118,7 @@ cmake --build build-mingw --parallel
 
 ### 沒有即時骨架或隊伍分類 / Live skeletons or teams are missing
 
-目前的唯讀進程來源沒有呼叫遊戲骨骼函數，也沒有完整取得隊伍規則。只有資料來源提供真實骨點／隊伍欄位時才能繪製骨架或準確分類；程式會保留未知狀態，不會虛構結果。/ The read-only process source does not call in-game bone functions and does not have complete team rules. Real bones and accurate team classification require those fields from the data source; missing values remain unknown rather than being fabricated.
+目前的唯讀進程來源沒有呼叫遊戲骨骼函數，也沒有完整取得隊伍規則。只有資料來源提供真實骨點／隊伍欄位時才能繪製骨架或準確分類；程式會保留未知隊伍狀態，不會虛構結果。/ The read-only process source does not call in-game bone functions and does not have complete team rules. Real bones and accurate team classification require those fields from the data source; missing team values remain unknown rather than being fabricated.
 
 ## 8. 專案模組 / Project modules
 

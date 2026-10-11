@@ -466,7 +466,7 @@ void OverlayApp::renderGui(const WorldSnapshot& snapshot) {
                     snapshot.live.viewMatrixRead ? "valid" : "unavailable",
                     snapshot.live.projectionMatrixRead ? "valid" : "unavailable",
                     snapshot.cameraPosition.x, snapshot.cameraPosition.y, snapshot.cameraPosition.z);
-        ImGui::Text(uiText(chinese, "目標槽位：%u | 玩家：%u | 名稱成功：%u（失敗：%u）| 生物：%u | 未分類：%u", "Actor slots: %u | players: %u | names read: %u (failed: %u) | creatures: %u | unknown: %u"),
+        ImGui::Text(uiText(chinese, "目標槽位：%u | 玩家：%u | 名稱成功：%u（失敗：%u）| 生物：%u | 實體：%u", "Actor slots: %u | players: %u | names read: %u (failed: %u) | creatures: %u | actors: %u"),
                     snapshot.live.actorSlots, snapshot.live.playerCount,
                     snapshot.live.playerNamesRead, snapshot.live.playerNameReadFailures,
                     snapshot.live.creatureCount, snapshot.live.unknownCount);
@@ -510,7 +510,7 @@ void OverlayApp::renderGui(const WorldSnapshot& snapshot) {
         }
     }
     if (ImGui::CollapsingHeader(uiText(chinese, "繪製診斷", "Draw diagnostics"))) {
-    ImGui::Text(uiText(chinese, "繪製診斷：目標 %zu（玩家 %zu / 生物 %zu / 未分類 %zu），已繪製 %zu", "Draw diagnostics: entities %zu (players %zu / creatures %zu / unknown %zu), drawn %zu"),
+    ImGui::Text(uiText(chinese, "繪製診斷：目標 %zu（玩家 %zu / 生物 %zu / 實體 %zu），已繪製 %zu", "Draw diagnostics: entities %zu (players %zu / creatures %zu / actors %zu), drawn %zu"),
                 snapshot.entities.size(), drawStats_.playerEntities, drawStats_.creatureEntities,
                 drawStats_.unknownEntities, drawStats_.drawn);
     ImGui::Text(uiText(chinese, "略過：類型 %zu、關係 %zu、可見性 %zu、距離 %zu、無範圍 %zu、無矩陣 %zu、超出視野 %zu", "Skipped: kind %zu, relation %zu, visibility %zu, distance %zu, no bounds %zu, no matrix %zu, clipped %zu"),
@@ -529,11 +529,11 @@ void OverlayApp::renderGui(const WorldSnapshot& snapshot) {
         if (ImGui::BeginTabItem(uiText(chinese, "目標", "Entities"))) {
             ImGui::Checkbox(uiText(chinese, "玩家", "Players"), &settings_.showPlayers); ImGui::SameLine();
             ImGui::Checkbox(uiText(chinese, "生物", "Creatures"), &settings_.showCreatures); ImGui::SameLine();
-            ImGui::Checkbox(uiText(chinese, "未分類", "Unknown"), &settings_.showUnknown);
+            ImGui::Checkbox(uiText(chinese, "實體", "Actors"), &settings_.showUnknown);
             ImGui::Checkbox(uiText(chinese, "隊友", "Friends"), &settings_.showFriends); ImGui::SameLine();
             ImGui::Checkbox(uiText(chinese, "敵人", "Enemies"), &settings_.showEnemies); ImGui::SameLine();
             ImGui::Checkbox(uiText(chinese, "中立", "Neutral"), &settings_.showNeutral);
-            ImGui::Checkbox(uiText(chinese, "只顯示可見目標（未分類仍顯示）", "Only visible (unknown stays visible)"), &settings_.visibleOnly);
+            ImGui::Checkbox(uiText(chinese, "只顯示可見目標（實體仍顯示）", "Only visible (actors without visibility data stay visible)"), &settings_.visibleOnly);
             ImGui::SliderFloat(uiText(chinese, "最大距離（米，0=不限）", "Max distance in meters (0 = unlimited)"),
                                &settings_.maxDistance, 0.0f, 100000.0f, "%.0f m");
             ImGui::InputFloat(uiText(chinese, "精確最大距離（米）", "Exact max distance (meters)"), &settings_.maxDistance, 1.0f, 100.0f, "%.1f m");
@@ -577,7 +577,7 @@ void OverlayApp::renderGui(const WorldSnapshot& snapshot) {
             };
             drawTypeOptions(uiText(chinese, "玩家項目", "Player options"), settings_.playerVisual);
             drawTypeOptions(uiText(chinese, "生物項目", "Creature options"), settings_.creatureVisual);
-            drawTypeOptions(uiText(chinese, "未分類目標項目", "Unknown actor options"), settings_.unknownVisual);
+            drawTypeOptions(uiText(chinese, "實體項目", "Actor options"), settings_.unknownVisual);
             ImGui::Checkbox(uiText(chinese, "目標數量", "Entity count"), &settings_.showEntityCount);
             if (settings_.showEntityCount) {
                 ImGui::SliderFloat(uiText(chinese, "數量字體大小", "Count text size"),
@@ -613,7 +613,7 @@ void OverlayApp::renderGui(const WorldSnapshot& snapshot) {
             ImGui::SeparatorText(uiText(chinese, "雷達目標", "Radar targets"));
             ImGui::Checkbox(uiText(chinese, "玩家標點", "Player markers"), &settings_.showRadarPlayers);
             ImGui::Checkbox(uiText(chinese, "生物標點", "Creature markers"), &settings_.showRadarCreatures);
-            ImGui::Checkbox(uiText(chinese, "未分類目標標點", "Unknown actor markers"), &settings_.showRadarUnknown);
+            ImGui::Checkbox(uiText(chinese, "實體標點", "Actor markers"), &settings_.showRadarUnknown);
             ImGui::Checkbox(uiText(chinese, "物件標點", "Object markers"), &settings_.showRadarObjects);
             ImGui::Separator();
             ImGui::SliderFloat(uiText(chinese, "雷達半徑", "Radar radius"), &settings_.radarRadius, 40.0f, 240.0f, "%.0f px");
@@ -794,7 +794,7 @@ int OverlayApp::run(HINSTANCE instance) {
     setInteractive(true); // Start with a visible control panel; Insert toggles click-through ESP mode.
 
     MSG message{};
-    while (running_) {
+    while (running_ && !stopRequested_.load()) {
         while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE)) {
             if (message.message == WM_QUIT) { running_ = false; break; }
             TranslateMessage(&message); DispatchMessageW(&message);

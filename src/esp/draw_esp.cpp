@@ -6,7 +6,9 @@
 #include <array>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 #include <limits>
+#include <optional>
 #include <string>
 
 namespace esp {
@@ -369,6 +371,47 @@ void drawSkeletonProjected(ImDrawList* draw, const WorldSnapshot& w, const Entit
     drawSkeletonRig(draw, w, e.bones, links, s, width, height);
 }
 
+std::string localizedEntityName(const Entity& entity, bool chinese) {
+    const std::string& name = entity.name;
+    const auto numberedSuffix = [&](const char* prefix) -> std::optional<std::string> {
+        const std::size_t length = std::strlen(prefix);
+        if (name.size() <= length || name.compare(0, length, prefix) != 0) return std::nullopt;
+        for (std::size_t i = length; i < name.size(); ++i)
+            if (name[i] < '0' || name[i] > '9') return std::nullopt;
+        return name.substr(length);
+    };
+    if (name == "Unknown actor" || name == "Unknown Actor")
+        return chinese ? "實體" : "Actor";
+    if (name == "(unnamed)") return chinese ? "（未命名）" : name;
+    if (name == "Object") return chinese ? "物件" : name;
+    if (name == "Dropped item") return chinese ? "掉落物品" : name;
+    if (name == "Local Player") return chinese ? "本地玩家" : name;
+    if (name == "Forest Creature") return chinese ? "森林生物" : name;
+    if (name == "Crate") return chinese ? "箱子" : name;
+    if (name.size() > 7 && name.compare(0, 7, "Player ") == 0) {
+        const bool digits = std::all_of(name.begin() + 7, name.end(), [](char c) { return c >= '0' && c <= '9'; });
+        if (digits) return (chinese ? "玩家 " : "Player ") + name.substr(7);
+    }
+    if (chinese) {
+        if (const auto suffix = numberedSuffix("ClientItem")) return "客戶端物品" + *suffix;
+        if (const auto suffix = numberedSuffix("ClientMob")) return "客戶端生物" + *suffix;
+        if (const auto suffix = numberedSuffix("ActorVillager")) return "村民" + *suffix;
+        if (const auto suffix = numberedSuffix("ActorHorse")) return "馬" + *suffix;
+        if (const auto suffix = numberedSuffix("ActorAnimal")) return "動物" + *suffix;
+        if (const auto suffix = numberedSuffix("ActorMonster")) return "怪物" + *suffix;
+        if (const auto suffix = numberedSuffix("ActorMob")) return "生物" + *suffix;
+    } else {
+        if (const auto suffix = numberedSuffix("ClientItem")) return "Client Item " + *suffix;
+        if (const auto suffix = numberedSuffix("ClientMob")) return "Client Creature " + *suffix;
+        if (const auto suffix = numberedSuffix("ActorVillager")) return "Villager " + *suffix;
+        if (const auto suffix = numberedSuffix("ActorHorse")) return "Horse " + *suffix;
+        if (const auto suffix = numberedSuffix("ActorAnimal")) return "Animal " + *suffix;
+        if (const auto suffix = numberedSuffix("ActorMonster")) return "Monster " + *suffix;
+        if (const auto suffix = numberedSuffix("ActorMob")) return "Creature " + *suffix;
+    }
+    return name;
+}
+
 void drawEntity(ImDrawList* draw, const WorldSnapshot& w, const Entity& e,
                 const Settings& s, int width, int height, DrawStats& stats) {
     switch (entityFilter(w, e, s)) {
@@ -412,9 +455,10 @@ void drawEntity(ImDrawList* draw, const WorldSnapshot& w, const Entity& e,
         const float pointFontSize = std::round(std::clamp(14.0f * distanceScale, 14.0f, 28.0f));
         ImFont* textFont = ImGui::GetFont();
         const ImU32 textColor = color(rgba, s.textOpacity);
+        const std::string displayName = localizedEntityName(e, s.guiLanguage == 0);
         if (showName) drawOutlinedText(draw, textFont, pointFontSize,
                                          ImVec2(point->x + 6.0f, point->y - 8.0f),
-                                         textColor, e.name.c_str());
+                                         textColor, displayName.c_str());
         if (showDistance) {
             char buf[32];
             std::snprintf(buf, sizeof(buf), " %.1fm", dMeters);
@@ -491,7 +535,7 @@ void drawEntity(ImDrawList* draw, const WorldSnapshot& w, const Entity& e,
     const bool drawHealth = showHealth;
     const bool drawHealthNumber = drawHealth && s.healthAsNumber;
     std::string label;
-    if (showName) label = e.name;
+    if (showName) label = localizedEntityName(e, s.guiLanguage == 0);
     const float d = distance(e.position, w.cameraPosition) / std::max(1.0f, w.unitsPerMeter);
     if (showDistance) {
         char buf[32]; std::snprintf(buf, sizeof(buf), "%s%.1fm", label.empty() ? "" : "  ", d);
@@ -572,7 +616,11 @@ void drawObject(ImDrawList* draw, const WorldSnapshot& w, const WorldObject& o,
     } else if (s.showObjectBox) {
         draw->AddRect(boxMin, boxMax, c, 0.0f, 0, s.objectThickness);
     }
-    std::string label = s.showObjectName ? o.name : std::string{};
+    Entity objectLabel;
+    objectLabel.kind = "object";
+    objectLabel.name = o.name;
+    std::string label = s.showObjectName
+        ? localizedEntityName(objectLabel, s.guiLanguage == 0) : std::string{};
     if (s.showObjectDistance) {
         char buf[24]; std::snprintf(buf, sizeof(buf), " %.1fm",
                                     distance(o.position, w.cameraPosition) / std::max(1.0f, w.unitsPerMeter));
@@ -621,11 +669,11 @@ DrawStats drawWorld(ImDrawList* draw, const WorldSnapshot& world, const Settings
     if (settings.showEntityCount) {
         char text[160];
         if (settings.guiLanguage == 0)
-            std::snprintf(text, sizeof(text), "玩家 %d   生物 %d   未分類 %d   物件 %zu",
+            std::snprintf(text, sizeof(text), "玩家 %d   生物 %d   實體 %d   物件 %zu",
                           playerCount, creatureCount, unknownCount,
                           world.objects.size() + static_cast<std::size_t>(liveObjectCount));
         else
-            std::snprintf(text, sizeof(text), "Players %d   Creatures %d   Unknown %d   Objects %zu",
+            std::snprintf(text, sizeof(text), "Players %d   Creatures %d   Actors %d   Objects %zu",
                           playerCount, creatureCount, unknownCount,
                           world.objects.size() + static_cast<std::size_t>(liveObjectCount));
         const ImVec2 position(
