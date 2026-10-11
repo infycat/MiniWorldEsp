@@ -1,0 +1,2 @@
+#include "resource.h"
+IDI_APP_ICON ICON "mcp-esp-icon.ico"

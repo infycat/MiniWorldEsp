@@ -1,0 +1,15 @@
+/build/
+/build-*/
+/out/
+/mcp-esp.ini
+/mcp-esp-ui.ini
+/logs/
+/dist/*
+*.user
+*.suo
+*.pdb
+*.ilk
+*.obj
+*.exe
+__pycache__/
+!/dist/mcp_esp_overlay.exe

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MCP ESP Overlay</title>
+  <desc id="desc">A cyan targeting reticle frames a transparent wireframe cube over a dark navy field.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111b32"/>
+      <stop offset="1" stop-color="#07101f"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#76f2ee"/>
+      <stop offset="1" stop-color="#36a9ff"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="174" fill="none" stroke="#24445e" stroke-width="3" stroke-dasharray="3 14"/>
+  <path d="M256 100v68m0 176v68M100 256h68m176 0h68" stroke="url(#cyan)" stroke-width="12" stroke-linecap="round"/>
+  <g fill="none" stroke="url(#cyan)" stroke-width="12" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)">
+    <path d="m256 151 103 59v119l-103 59-103-59V210z"/>
+    <path d="m153 210 103 60 103-60M256 270v118"/>
+  </g>
+  <circle cx="256" cy="270" r="12" fill="#ffbd69" stroke="#111b32" stroke-width="6"/>
+  <circle cx="256" cy="270" r="4" fill="#fff3d7"/>
+  <path d="M370 125a160 160 0 0 1 38 46" fill="none" stroke="#ffbd69" stroke-width="8" stroke-linecap="round"/>
+</svg>

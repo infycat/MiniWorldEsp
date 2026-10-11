@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/mcp-esp-overlay/world_snapshot.schema.json",
+  "title": "MCP ESP Overlay snapshot v1",
+  "type": "object",
+  "required": ["schemaVersion", "sequence", "source", "camera", "viewMatrix", "projectionMatrix", "entities", "objects"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "demo": {"type": "boolean", "description": "True marks synthetic demonstration data; the viewer displays a persistent warning."},
+    "sequence": {"type": "integer", "minimum": 0},
+    "source": {"type": "string", "minLength": 1},
+    "backend": {"type": "string"},
+    "matrixLayout": {"const": "column-major"},
+    "localPlayerId": {"type": "string"},
+    "localTeam": {"type": ["integer", "null"]},
+    "attackPlayerRule": {"type": ["integer", "null"], "description": "GMRULE_ATTACKPLAYER from WorldMgr:getGameRuleValue: 1 treats all players as friendly, 2 treats matching non-zero teams as friendly and the rest as enemies, other values treat all players as enemies."},
+    "camera": {"$ref": "#/$defs/camera"},
+    "viewMatrix": {"$ref": "#/$defs/matrix4"},
+    "projectionMatrix": {"$ref": "#/$defs/matrix4"},
+    "entities": {"type": "array", "items": {"$ref": "#/$defs/entity"}},
+    "players": {"type": "array", "items": {"$ref": "#/$defs/entity"}},
+    "creatures": {"type": "array", "items": {"$ref": "#/$defs/entity"}},
+    "objects": {"type": "array", "items": {"$ref": "#/$defs/object"}}
+  },
+  "$defs": {
+    "vec3": {
+      "oneOf": [
+        {"type": "array", "prefixItems": [{"type": "number"}, {"type": "number"}, {"type": "number"}], "minItems": 3, "maxItems": 3},
+        {"type": "object", "required": ["x", "y", "z"], "properties": {"x": {"type": "number"}, "y": {"type": "number"}, "z": {"type": "number"}}, "additionalProperties": false}
+      ]
+    },
+    "matrix4": {"type": "array", "items": {"type": "number"}, "minItems": 16, "maxItems": 16},
+    "camera": {
+      "type": "object",
+      "required": ["position", "forward"],
+      "properties": {
+        "position": {"$ref": "#/$defs/vec3", "description": "Current camera eye position; source from ClientPlayer:getEyePosition()."},
+        "forward": {"$ref": "#/$defs/vec3", "description": "Current view direction; source from ClientPlayer:getCameraLookDir()."},
+        "right": {"$ref": "#/$defs/vec3", "description": "Optional camera right vector. If absent, derived from world up and forward."},
+        "up": {"$ref": "#/$defs/vec3"}
+      },
+      "additionalProperties": true
+    },
+    "entity": {
+      "type": "object",
+      "required": ["kind", "position"],
+      "properties": {
+        "id": {"type": ["string", "integer"]},
+        "kind": {"enum": ["player", "creature", "mob", "other"]},
+        "name": {"type": "string"},
+        "relation": {"enum": ["friend", "enemy", "neutral"]},
+        "position": {"$ref": "#/$defs/vec3"},
+        "halfExtents": {"$ref": "#/$defs/vec3", "description": "Half width, half height and half depth in world units."},
+        "bounds": {"$ref": "#/$defs/vec3", "description": "Legacy alias for halfExtents."},
+        "size": {"$ref": "#/$defs/vec3", "description": "Full width, height and depth; converted to half extents by the viewer."},
+        "velocity": {"$ref": "#/$defs/vec3"},
+        "health": {"type": ["number", "null"]},
+        "maxHealth": {"type": ["number", "null"]},
+        "team": {"type": ["integer", "null"]},
+        "visible": {"type": ["boolean", "null"], "description": "null means source has no authoritative visibility result."},
+        "bones": {"type": "object", "additionalProperties": {"$ref": "#/$defs/vec3"}},
+        "bone_links": {"type": "array", "items": {"type": "array", "prefixItems": [{"type": "string"}, {"type": "string"}], "minItems": 2, "maxItems": 2}}
+      },
+      "additionalProperties": true
+    },
+    "object": {
+      "type": "object",
+      "required": ["position"],
+      "properties": {
+        "id": {"type": ["string", "integer"]}, "kind": {"type": "string"}, "type": {"type": "string"},
+        "name": {"type": "string"}, "position": {"$ref": "#/$defs/vec3"},
+        "halfExtents": {"$ref": "#/$defs/vec3"}, "bounds": {"$ref": "#/$defs/vec3"},
+        "size": {"$ref": "#/$defs/vec3"}, "visible": {"type": ["boolean", "null"]}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
