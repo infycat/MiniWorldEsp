@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "demo": true,
+  "sequence": 42,
+  "source": "sample-data",
+  "backend": "sample",
+  "localPlayerId": "p-local",
+  "localTeam": 1,
+  "attackPlayerRule": 2,
+  "camera": {
+    "position": [0.0, 2.0, -12.0],
+    "forward": [0.0, 0.0, 1.0],
+    "right": [1.0, 0.0, 0.0]
+  },
+  "matrixLayout": "column-major",
+  "viewMatrix": [
+    1,0,0,0, 0,1,0,0, 0,0,1,0, 0,-2,12,1
+  ],
+  "projectionMatrix": [
+    0.8033,0,0,0, 0,1.4281,0,0, 0,0,1.0001,1, 0,0,-0.10001,0
+  ],
+  "entities": [
+    {
+      "id": "p-local", "kind": "player", "name": "Local Player", "relation": "friend",
+      "position": [0.0, 0.9, 8.0], "halfExtents": [0.35, 0.9, 0.35],
+      "velocity": [0.0, 0.0, 0.0], "health": 80, "maxHealth": 100,
+      "team": 1, "visible": true,
+      "bones": {
+        "head": [0,1.78,8], "neck": [0,1.55,8], "chest": [0,1.34,8], "spine": [0,1.14,8], "pelvis": [0,0.96,8],
+        "shoulderL": [-0.24,1.36,8], "elbowL": [-0.38,1.12,8], "handL": [-0.46,0.91,8],
+        "shoulderR": [0.24,1.36,8], "elbowR": [0.38,1.12,8], "handR": [0.46,0.91,8],
+        "hipL": [-0.16,0.84,8], "kneeL": [-0.18,0.46,8], "footL": [-0.19,0.03,8],
+        "hipR": [0.16,0.84,8], "kneeR": [0.18,0.46,8], "footR": [0.19,0.03,8]
+      },
+      "bone_links": [
+        ["head","neck"],["neck","chest"],["chest","spine"],["spine","pelvis"],
+        ["chest","shoulderL"],["shoulderL","elbowL"],["elbowL","handL"],
+        ["chest","shoulderR"],["shoulderR","elbowR"],["elbowR","handR"],
+        ["pelvis","hipL"],["hipL","kneeL"],["kneeL","footL"],
+        ["pelvis","hipR"],["hipR","kneeR"],["kneeR","footR"]
+      ]
+    },
+    {
+      "id": "mob-21", "kind": "creature", "name": "Forest Creature", "relation": "enemy",
+      "position": [-2.0,0.72,11.0], "halfExtents": [0.55,0.72,0.5],
+      "velocity": [0.02,0.0,0.0], "health": 45, "maxHealth": 60,
+      "team": 2, "visible": null,
+      "bones": {
+        "head": [-2,1.35,11], "neck": [-2,1.18,11], "chest": [-2,0.98,11], "spine": [-2,0.8,11], "pelvis": [-2,0.58,11],
+        "shoulderL": [-2.25,1.0,11], "elbowL": [-2.42,0.82,11], "handL": [-2.50,0.63,11],
+        "shoulderR": [-1.75,1.0,11], "elbowR": [-1.58,0.82,11], "handR": [-1.50,0.63,11],
+        "hipL": [-2.15,0.53,11], "kneeL": [-2.2,0.28,11], "footL": [-2.22,0.03,11],
+        "hipR": [-1.85,0.53,11], "kneeR": [-1.8,0.28,11], "footR": [-1.78,0.03,11]
+      },
+      "bone_links": [
+        ["head","neck"],["neck","chest"],["chest","spine"],["spine","pelvis"],
+        ["chest","shoulderL"],["shoulderL","elbowL"],["elbowL","handL"],
+        ["chest","shoulderR"],["shoulderR","elbowR"],["elbowR","handR"],
+        ["pelvis","hipL"],["hipL","kneeL"],["kneeL","footL"],
+        ["pelvis","hipR"],["hipR","kneeR"],["kneeR","footR"]
+      ]
+    }
+  ],
+  "objects": [
+    {"id":"drop-1","kind":"drop","name":"Dropped item","position":[2.0,0.5,7.0],"halfExtents":[0.22,0.22,0.22],"visible":true},
+    {"id":"prop-2","kind":"interactable","name":"Crate","position":[3.0,0.6,13.0],"halfExtents":[0.6,0.6,0.6],"visible":null}
+  ]
+}

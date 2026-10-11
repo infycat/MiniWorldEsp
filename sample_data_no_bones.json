@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "demo": true,
+  "sequence": 7,
+  "source": "sample-data-no-bones",
+  "backend": "sample",
+  "localPlayerId": "p-local",
+  "localTeam": 1,
+  "camera": {
+    "position": [0.0, 2.0, -12.0],
+    "forward": [0.0, 0.0, 1.0],
+    "right": [1.0, 0.0, 0.0]
+  },
+  "matrixLayout": "column-major",
+  "viewMatrix": [
+    1,0,0,0, 0,1,0,0, 0,0,1,0, 0,-2,12,1
+  ],
+  "projectionMatrix": [
+    0.8033,0,0,0, 0,1.4281,0,0, 0,0,1.0001,1, 0,0,-0.10001,0
+  ],
+  "entities": [
+    {
+      "id": "p-local", "kind": "player", "name": "Local Player", "relation": "friend",
+      "position": [0.0, 0.9, 8.0], "halfExtents": [0.35, 0.9, 0.35],
+      "velocity": [0.0, 0.0, 0.0], "health": 80, "maxHealth": 100,
+      "team": 1, "visible": true
+    },
+    {
+      "id": "mob-21", "kind": "creature", "name": "Forest Creature", "relation": "enemy",
+      "position": [-2.0, 0.72, 11.0], "halfExtents": [0.55, 0.72, 0.5],
+      "velocity": [0.02, 0.0, 0.0], "health": 45, "maxHealth": 60,
+      "team": 2, "visible": null
+    }
+  ],
+  "objects": [
+    {"id":"drop-1","kind":"drop","name":"Dropped item","position":[2.0,0.5,7.0],"halfExtents":[0.22,0.22,0.22],"visible":true},
+    {"id":"prop-2","kind":"interactable","name":"Crate","position":[3.0,0.6,13.0],"halfExtents":[0.6,0.6,0.6],"visible":null}
+  ]
+}
