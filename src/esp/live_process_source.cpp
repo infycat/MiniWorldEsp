@@ -8,11 +8,13 @@
 #include <TlHelp32.h>
 
 #include <array>
+#include <algorithm>
 #include <cmath>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <iomanip>
+#include <limits>
 #include <sstream>
 #include <unordered_set>
 
@@ -72,12 +74,21 @@ bool plausiblePosition(const std::array<std::int32_t, 3>& position) {
 
 template <typename T>
 bool readValue(HANDLE process, std::uintptr_t address, T& out);
+bool readBytes(HANDLE process, std::uintptr_t address, void* out, std::size_t size);
 
-bool readCameraMatrix(HANDLE process, std::uintptr_t address, Mat4& out) {
-    for (std::size_t i = 0; i < out.v.size(); ++i) {
-        if (!readValue(process, address + i * sizeof(float), out.v[i]) ||
-            !std::isfinite(out.v[i]) || std::fabs(out.v[i]) > 1.0e7f) return false;
-    }
+bool readCameraMatrices(HANDLE process, std::uintptr_t camera, Mat4& view, Mat4& projection) {
+    // Read the two adjacent matrices in one RPM call. Reading each float
+    // separately allowed the game to update the camera between calls, making
+    // a single frame combine rows from different camera poses (visible as ESP
+    // boxes sliding or shearing while the player turns).
+    static_assert(kCameraProjectionMatrixOffset == kCameraViewMatrixOffset + sizeof(Mat4));
+    std::array<float, 32> matrices{};
+    if (!readBytes(process, camera + kCameraViewMatrixOffset,
+                   matrices.data(), sizeof(matrices))) return false;
+    std::copy_n(matrices.begin(), 16, view.v.begin());
+    std::copy_n(matrices.begin() + 16, 16, projection.v.begin());
+    for (const float value : matrices)
+        if (!std::isfinite(value) || std::fabs(value) > 1.0e7f) return false;
     return true;
 }
 
@@ -256,7 +267,10 @@ std::uint32_t findProcess(const std::wstring& name) {
 LiveProcessSource::LiveProcessSource(std::wstring processName)
     : processName_(std::move(processName)) {}
 
-LiveProcessSource::~LiveProcessSource() { close(); }
+LiveProcessSource::~LiveProcessSource() {
+    close();
+    if (cameraProcessHandle_) CloseHandle(static_cast<HANDLE>(cameraProcessHandle_));
+}
 
 void LiveProcessSource::close() {
     if (processHandle_) CloseHandle(static_cast<HANDLE>(processHandle_));
@@ -362,9 +376,7 @@ bool LiveProcessSource::read(WorldSnapshot& out, std::string& error) {
     }
 
     std::array<std::int32_t, 3> rawPosition{};
-    if (!readValue(process, motion + kPositionXOffset, rawPosition[0]) ||
-        !readValue(process, motion + kPositionXOffset + 4, rawPosition[1]) ||
-        !readValue(process, motion + kPositionXOffset + 8, rawPosition[2])) {
+    if (!readBytes(process, motion + kPositionXOffset, rawPosition.data(), sizeof(rawPosition))) {
         error = "Cannot read the live player position";
         return false;
     }
@@ -419,13 +431,8 @@ bool LiveProcessSource::read(WorldSnapshot& out, std::string& error) {
         CameraCandidate candidate;
         candidate.address = address;
         if (!plausiblePointer(address)) return candidate;
-        const bool viewOk = readCameraMatrix(process,
-            static_cast<std::uintptr_t>(address) + kCameraViewMatrixOffset, candidate.view) &&
-            validViewMatrix(candidate.view);
-        const bool projectionOk = readCameraMatrix(process,
-            static_cast<std::uintptr_t>(address) + kCameraProjectionMatrixOffset, candidate.projection) &&
-            validProjectionMatrix(candidate.projection);
-        candidate.valid = viewOk && projectionOk;
+        candidate.valid = readCameraMatrices(process, address, candidate.view, candidate.projection) &&
+                          validViewMatrix(candidate.view) && validProjectionMatrix(candidate.projection);
         return candidate;
     };
     // Prefer the same camera used by PlayerControl::getPointToScreen. If that
@@ -469,9 +476,7 @@ bool LiveProcessSource::read(WorldSnapshot& out, std::string& error) {
             return false;
         }
         std::array<std::int32_t, 3> position{};
-        if (!readValue(process, component + kPositionXOffset, position[0]) ||
-            !readValue(process, component + kPositionXOffset + 4, position[1]) ||
-            !readValue(process, component + kPositionXOffset + 8, position[2])) {
+        if (!readBytes(process, component + kPositionXOffset, position.data(), sizeof(position))) {
             ++next.live.positionReadFailures;
             return false;
         }
@@ -591,6 +596,23 @@ bool LiveProcessSource::read(WorldSnapshot& out, std::string& error) {
         }
     }
 
+    // Actor collection can take several milliseconds. Refresh the selected
+    // game camera after the positions are sampled so the published snapshot
+    // pairs the newest camera pose with those actor coordinates. The camera
+    // pair itself remains one coherent contiguous read.
+    if (next.live.matrixAvailable) {
+        CameraCandidate latestCamera = readCameraCandidate(next.live.renderCamera);
+        if (latestCamera.valid) {
+            next.viewMatrix = latestCamera.view;
+            next.projectionMatrix = latestCamera.projection;
+            next.cameraPosition = cameraEyeFromView(next.viewMatrix);
+            next.cameraRight = {next.viewMatrix.v[0], next.viewMatrix.v[4], next.viewMatrix.v[8]};
+            next.cameraForward = {-next.viewMatrix.v[2], -next.viewMatrix.v[6], -next.viewMatrix.v[10]};
+        }
+        next.cameraSampledAt = std::chrono::steady_clock::now();
+        next.cameraAgeMs = 0.0;
+    }
+
     next.live.liveActorCount = static_cast<std::uint32_t>(next.entities.size());
     for (const Entity& entity : next.entities) {
         if (entity.kind == "player") ++next.live.playerCount;
@@ -669,6 +691,89 @@ bool LiveProcessSource::read(WorldSnapshot& out, std::string& error) {
     next.valid = true;
     out = std::move(next);
     error.clear();
+    return true;
+}
+
+bool LiveProcessSource::refreshCamera(WorldSnapshot& snapshot) {
+    if (!snapshot.live.available || snapshot.live.processId == 0) return false;
+    const auto now = std::chrono::steady_clock::now();
+    const auto closeCameraHandle = [&]() {
+        if (cameraProcessHandle_) CloseHandle(static_cast<HANDLE>(cameraProcessHandle_));
+        cameraProcessHandle_ = nullptr;
+        cameraProcessId_ = 0;
+        cameraModuleBase_ = 0;
+    };
+    if (cameraProcessHandle_ && cameraProcessId_ != snapshot.live.processId)
+        closeCameraHandle();
+    if (!cameraProcessHandle_) {
+        if (now < nextCameraAttachAttempt_) return false;
+        nextCameraAttachAttempt_ = now + std::chrono::seconds(1);
+        HANDLE process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ,
+                                     FALSE, snapshot.live.processId);
+        if (!process) return false;
+        const std::uintptr_t module = findModuleBase(snapshot.live.processId, L"libSandboxEngine.dll");
+        if (!module) {
+            CloseHandle(process);
+            return false;
+        }
+        cameraProcessHandle_ = process;
+        cameraProcessId_ = snapshot.live.processId;
+        cameraModuleBase_ = module;
+    }
+
+    const HANDLE process = static_cast<HANDLE>(cameraProcessHandle_);
+    DWORD exitCode = 0;
+    if (WaitForSingleObject(process, 0) != WAIT_TIMEOUT ||
+        !GetExitCodeProcess(process, &exitCode) || exitCode != STILL_ACTIVE) {
+        closeCameraHandle();
+        nextCameraAttachAttempt_ = now + std::chrono::milliseconds(250);
+        return false;
+    }
+
+    std::uint32_t player = 0, gameCamera = 0, renderCamera = 0;
+    if (readValue(process, cameraModuleBase_ + kPlayerControllerGlobalRva, player) &&
+        plausiblePointer(player) &&
+        readValue(process, player + kPlayerGameCameraOffset, gameCamera) &&
+        plausiblePointer(gameCamera))
+        readValue(process, gameCamera + kGameCameraRenderCameraOffset, renderCamera);
+
+    Mat4 view{}, projection{};
+    bool valid = plausiblePointer(renderCamera) &&
+        readCameraMatrices(process, renderCamera, view, projection) &&
+        validViewMatrix(view) && validProjectionMatrix(projection);
+
+    // Match the same validated renderer-camera fallback used by the full
+    // snapshot reader if the player-control camera is temporarily changing.
+    if (!valid) {
+        std::uint32_t world = 0, renderer = 0, fallbackCamera = 0;
+        if (plausiblePointer(player) && readValue(process, player + kWorldOffset, world) &&
+            plausiblePointer(world) && readValue(process, world + kWorldRendererOffset, renderer) &&
+            plausiblePointer(renderer) && readValue(process, renderer + kRenderCameraOffset, fallbackCamera) &&
+            plausiblePointer(fallbackCamera) &&
+            readCameraMatrices(process, fallbackCamera, view, projection) &&
+            validViewMatrix(view) && validProjectionMatrix(projection)) {
+            renderCamera = fallbackCamera;
+            valid = true;
+        }
+    }
+    if (!valid) {
+        snapshot.cameraAgeMs = snapshot.cameraSampledAt == std::chrono::steady_clock::time_point{}
+            ? std::numeric_limits<double>::infinity()
+            : std::chrono::duration<double, std::milli>(now - snapshot.cameraSampledAt).count();
+        return false;
+    }
+
+    snapshot.viewMatrix = view;
+    snapshot.projectionMatrix = projection;
+    snapshot.cameraPosition = cameraEyeFromView(view);
+    snapshot.cameraRight = {view.v[0], view.v[4], view.v[8]};
+    snapshot.cameraForward = {-view.v[2], -view.v[6], -view.v[10]};
+    snapshot.live.renderCamera = renderCamera;
+    snapshot.live.viewMatrixRead = true;
+    snapshot.live.projectionMatrixRead = true;
+    snapshot.live.matrixAvailable = true;
+    snapshot.cameraSampledAt = now;
+    snapshot.cameraAgeMs = 0.0;
     return true;
 }
 

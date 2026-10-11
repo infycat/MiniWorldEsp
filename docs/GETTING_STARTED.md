@@ -86,14 +86,14 @@ cmake --build build-mingw --parallel
 .\dist\mcp_esp_overlay.exe --data .\sample_data.json
 ```
 
-鍵盤操作：`Insert` 顯示／隱藏控制面板；`End` 離開。拖曳控制面板標題列或雷達標題列可以移動位置，位置會限制在遊戲視窗範圍內。Settings 分頁可切換深色與白藍主題，選擇會保存在 EXE 旁的 `mcp-esp-ui.ini`。/ Controls: press `Insert` to show or hide the panel and `End` to exit. Drag the panel title bar or radar title bar to move it; both stay inside the game window. The Settings tab switches between Dark and White + Blue. The choice is saved in `mcp-esp-ui.ini` next to the executable.
+鍵盤操作：`Insert` 顯示／隱藏控制面板；`End` 離開。拖曳控制面板標題列或雷達標題列可以移動位置，位置會限制在遊戲視窗範圍內。Settings 分頁可切換繁體中文／英文與深色／白藍主題，選擇會保存在 EXE 旁的 `mcp-esp-ui.ini`。Entities 分頁的「目標數量」可調文字大小與螢幕 X/Y 位置，並有黑色描邊。即時模式每個繪圖影格更新相機矩陣，減少快速轉動時的方框延遲。/ Controls: press `Insert` to show or hide the panel and `End` to exit. Drag the panel title bar or radar title bar to move it; both stay inside the game window. The Settings tab switches between Traditional Chinese / English and Dark / White + Blue themes. Choices are saved in `mcp-esp-ui.ini` next to the executable. In Entities, enable Entity count to adjust its font size and screen X/Y position; the text has a black outline. Live mode refreshes camera matrices every render frame to reduce box lag during fast turns.
 
 ## 6. 執行時檔案 / Runtime files
 
 | 檔案 / File | 說明 / Purpose |
 |---|---|
 | `dist/mcp_esp_overlay.exe` | [下載 Windows 執行檔 / Download the Windows executable](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)，包含 Windows 圖標。/ Final app with embedded Windows icon. |
-| `dist/mcp-esp-ui.ini` | 主題選擇；執行時自動建立。/ Theme preference; created at runtime. |
+| `dist/mcp-esp-ui.ini` | 語言與主題選擇；執行時自動建立。/ Language and theme preferences; created at runtime. |
 | `mcp-esp.ini` | Dear ImGui 視窗位置與版面設定。/ Dear ImGui window positions and layout. |
 | `logs/esp.log` | 限頻資料來源、讀取及繪圖診斷。/ Rate-limited source, read, and drawing diagnostics. |
 | `sample_data*.json` | 離線示範或 JSON 輸入範例。/ Offline demo or JSON input samples. |

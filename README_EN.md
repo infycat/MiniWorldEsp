@@ -21,17 +21,18 @@ A Windows real-time visualization overlay sample built with C++20, Win32, Direct
 | Labels and health | Displays names, distance, health bars, and optional health numbers beside the distance label. Missing health data is never fabricated. |
 | Antenna lines | Connects a selected screen anchor to the projected target position; opacity and width are adjustable. |
 | Skeletons | Draws source-provided bone positions and links. Live mode does not call in-game bone functions and will not synthesize live skeletons. Demo data can use a clearly marked generic rig. |
+| Entity count | Shows player, creature, unknown, and object totals with a black text outline; font size and screen X/Y position are adjustable. |
 | Objects | Shows object boxes, face fills, names, and distance. Object styling can be adjusted separately. |
 | Radar | A draggable, position-adjustable 2D radar oriented by camera heading. It shows entities and objects around the local player. |
 | Crosshair | Cross, circle, corner, or dynamic style; configurable size, gap, color, opacity, and thickness, plus an optional adjustable ring. |
-| GUI themes | Dark and White + Blue themes. The selection is saved beside the executable. |
-| Diagnostics | The panel reports source status, read sequence, matrices, entity counts, and draw skip reasons. `logs/esp.log` records rate-limited diagnostics. |
+| GUI language and themes | Switch between Traditional Chinese and English, and between Dark and White + Blue themes. Choices are saved beside the executable. |
+| Diagnostics | The panel reports target and camera data age, update rate, matrices, entity counts, and draw skip reasons. `logs/esp.log` records rate-limited diagnostics. |
 
 Press **Insert** to show or hide the control panel and switch menu interaction. The GUI and radar are interactive; the remaining overlay area passes clicks through to the game. Press **End** to exit.
 
 ## Data and limitations
 
-- **Live mode (default):** Reads a running `MiniGameApp.exe` with query/read access only. It does not write game memory or inject code. The current reader targets the game layout verified during development; updates may require revalidation.
+- **Live mode (default):** Reads a running `MiniGameApp.exe` with query/read access only. It does not write game memory or inject code. Target data updates in the background while the camera matrices are refreshed each render frame to reduce box lag during fast turns. The current reader targets the game layout verified during development; updates may require revalidation.
 - **JSON mode:** `--data <file>` reads a snapshot conforming to [the JSON schema](schemas/world_snapshot.schema.json). It is the main integration point for another data provider.
 - **Demo mode:** `--demo` loads synthetic data and visibly labels the overlay `DEMO DATA - NOT LIVE GAME DATA`.
 - Live actor lists are classified from runtime type labels. Team rules are not completely available in the current reader, so players remain unclassified when metadata is missing.

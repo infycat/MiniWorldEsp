@@ -272,7 +272,14 @@ WorldSnapshot SnapshotPoller::latest() const {
     if (snapshot.sampledAt != std::chrono::steady_clock::time_point{})
         snapshot.snapshotAgeMs = std::chrono::duration<double, std::milli>(
             std::chrono::steady_clock::now() - snapshot.sampledAt).count();
+    if (snapshot.cameraSampledAt != std::chrono::steady_clock::time_point{})
+        snapshot.cameraAgeMs = std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - snapshot.cameraSampledAt).count();
     return snapshot;
+}
+
+bool SnapshotPoller::refreshCamera(WorldSnapshot& snapshot) {
+    return source_ && source_->refreshCamera(snapshot);
 }
 
 std::string SnapshotPoller::lastError() const {

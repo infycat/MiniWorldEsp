@@ -13,6 +13,9 @@ class IDataSource {
 public:
     virtual ~IDataSource() = default;
     virtual bool read(WorldSnapshot& out, std::string& error) = 0;
+    // Optional render-rate camera refresh; slow entity enumeration stays on
+    // the background polling thread.
+    virtual bool refreshCamera(WorldSnapshot&) { return false; }
 };
 
 // Reads a normalized JSON snapshot. It intentionally does not invent bones,
@@ -34,6 +37,7 @@ public:
     explicit LiveProcessSource(std::wstring processName = L"MiniGameApp.exe");
     ~LiveProcessSource() override;
     bool read(WorldSnapshot& out, std::string& error) override;
+    bool refreshCamera(WorldSnapshot& snapshot) override;
 private:
     bool attach(std::string& error);
     void close();
@@ -41,6 +45,12 @@ private:
     void* processHandle_ = nullptr;
     std::uint32_t processId_ = 0;
     std::uintptr_t moduleBase_ = 0;
+    // Independent handle/state so render-rate matrix reads never race the
+    // snapshot worker's attach/detach lifecycle.
+    void* cameraProcessHandle_ = nullptr;
+    std::uint32_t cameraProcessId_ = 0;
+    std::uintptr_t cameraModuleBase_ = 0;
+    std::chrono::steady_clock::time_point nextCameraAttachAttempt_{};
 };
 
 // MCP calls and file reads stay off the render thread. The render loop only
@@ -49,13 +59,14 @@ private:
 class SnapshotPoller {
 public:
     explicit SnapshotPoller(std::unique_ptr<IDataSource> source,
-                            std::chrono::milliseconds interval = std::chrono::milliseconds(33));
+                            std::chrono::milliseconds interval = std::chrono::milliseconds(16));
     ~SnapshotPoller();
     SnapshotPoller(const SnapshotPoller&) = delete;
     SnapshotPoller& operator=(const SnapshotPoller&) = delete;
     WorldSnapshot latest() const;
     std::string lastError() const;
     bool connected() const;
+    bool refreshCamera(WorldSnapshot& snapshot);
 private:
     void run();
     std::unique_ptr<IDataSource> source_;

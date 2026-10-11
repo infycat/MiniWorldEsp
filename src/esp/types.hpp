@@ -51,7 +51,9 @@ struct WorldSnapshot {
     double sourceReadMs = 0.0;
     double updateHz = 0.0;
     double snapshotAgeMs = 0.0;
+    double cameraAgeMs = 0.0;
     std::chrono::steady_clock::time_point sampledAt{};
+    std::chrono::steady_clock::time_point cameraSampledAt{};
     std::string source;
     std::string backend;
     Vec3 cameraPosition{};
@@ -117,6 +119,7 @@ struct WorldSnapshot {
 struct Settings {
     bool guiVisible = true;
     int guiTheme = 0; // 0 dark, 1 white/blue
+    int guiLanguage = 0; // 0 Traditional Chinese, 1 English
     bool showPlayers = true;
     bool showCreatures = true;
     bool showUnknown = true;
@@ -146,6 +149,9 @@ struct Settings {
     bool use3dBoxes = true;
     bool visibleOnly = false; // unknown visibility remains visible
     bool showEntityCount = true;
+    float entityCountFontSize = 20.0f;
+    float entityCountX = 14.0f;
+    float entityCountY = 12.0f;
     int antennaAnchor = 2;    // 0 top, 1 bottom, 2 screen center (Lua ESP default)
     int crosshairStyle = 0;   // 0 cross, 1 circle, 2 corners, 3 animated
 

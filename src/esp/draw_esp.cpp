@@ -604,10 +604,20 @@ DrawStats drawWorld(ImDrawList* draw, const WorldSnapshot& world, const Settings
         draw->AddText(pos, IM_COL32(255, 245, 245, 255), warning);
     }
     if (settings.showEntityCount) {
-        char text[128]; std::snprintf(text, sizeof(text), "Players %d   Creatures %d   Unknown %d   Objects %zu",
-                                       playerCount, creatureCount, unknownCount,
-                                       world.objects.size() + static_cast<std::size_t>(liveObjectCount));
-        draw->AddText(ImVec2(14, world.demoData ? 38.0f : 12.0f), color({1,1,1,1}, settings.textOpacity), text);
+        char text[160];
+        if (settings.guiLanguage == 0)
+            std::snprintf(text, sizeof(text), "玩家 %d   生物 %d   未分類 %d   物件 %zu",
+                          playerCount, creatureCount, unknownCount,
+                          world.objects.size() + static_cast<std::size_t>(liveObjectCount));
+        else
+            std::snprintf(text, sizeof(text), "Players %d   Creatures %d   Unknown %d   Objects %zu",
+                          playerCount, creatureCount, unknownCount,
+                          world.objects.size() + static_cast<std::size_t>(liveObjectCount));
+        const ImVec2 position(
+            std::clamp(settings.entityCountX, 0.0f, std::max(0.0f, static_cast<float>(width) - 1.0f)),
+            std::clamp(settings.entityCountY, 0.0f, std::max(0.0f, static_cast<float>(height) - 1.0f)));
+        drawOutlinedText(draw, ImGui::GetFont(), std::clamp(settings.entityCountFontSize, 10.0f, 64.0f),
+                         position, color({1,1,1,1}, settings.textOpacity), text, 1.5f);
     }
     stats.playerEntities = static_cast<std::size_t>(playerCount);
     stats.creatureEntities = static_cast<std::size_t>(creatureCount);
