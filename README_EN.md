@@ -10,7 +10,11 @@ A Windows real-time visualization overlay sample built with C++20, Win32, Direct
 
 ## Download
 
-[Download the Windows executable (.exe)](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)
+**Windows x64 · Portable**
+
+[⬇️ Download the latest Windows build](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)
+
+Once downloaded, open `mcp_esp_overlay.exe` and select **Start ESP** in the launcher. To build from source or inspect the code, see the [build guide](docs/GETTING_STARTED.md).
 
 ## Features
 

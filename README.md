@@ -8,9 +8,13 @@
 
 > **資料來源說明：**一般啟動時由 C++ 程式直接以唯讀 `ReadProcessMemory` 讀取相容版本的 MiniWorld 遊戲進程；執行時不需要 Cheat Engine MCP。CE MCP 曾用於開發時確認遊戲資料與函數。`--data` 和 `--demo` 則用於離線資料或示範。
 
-## MCP ESP EXE 下載 / Download
+## 下載 / Download
 
-[下載 Windows 執行檔（EXE）](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)
+**Windows 64 位元 · 免安裝**
+
+[⬇️ 下載最新版 Windows 執行檔](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)
+
+下載完成後開啟 `mcp_esp_overlay.exe`，在啟動控制台按「開啟 ESP」即可使用。想自行編譯或查看程式內容，可參考下方原始碼與[編譯指南](docs/GETTING_STARTED.md)。
 
 ## 功能一覽
 
