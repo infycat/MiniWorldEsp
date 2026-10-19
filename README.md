@@ -12,9 +12,11 @@
 
 **Windows 64 位元 · 免安裝**
 
-[⬇️ 下載最新版 Windows 執行檔](https://raw.githubusercontent.com/infycat/MiniWorldEsp/main/dist/mcp_esp_overlay.exe)
+[⬇️ 前往 GitHub Releases 下載最新版](https://github.com/infycat/MiniWorldEsp/releases/latest)
 
-下載完成後開啟 `mcp_esp_overlay.exe`，在啟動控制台按「開啟 ESP」即可使用。想自行編譯或查看程式內容，可參考下方原始碼與[編譯指南](docs/GETTING_STARTED.md)。
+GitHub 會自動把此連結導向最新正式版本；在 Releases 頁面可查看版本說明、歷史版本及 `SHA256SUMS.txt` 完整性校驗檔。若想在更新時收到通知，可於倉庫右上角選擇 **Watch → Custom → Releases**。
+
+下載 `mcp_esp_overlay.exe` 後直接開啟，在啟動控制台按「開啟 ESP」即可使用。想自行編譯或查看程式內容，可參考下方原始碼與[編譯指南](docs/GETTING_STARTED.md)。
 
 ## 功能一覽
 
@@ -148,7 +150,7 @@ cmake --build build --config Release
 
 MinGW 與 MSVC Release 都靜態連結 C++ 執行階段。發佈版不需要另外安裝 MinGW 或 VC++ Redistributable；其餘依賴是 Windows 10/11 系統元件。即時模式需要相容的 MiniWorld 客戶端正在執行；不同遊戲版本或記憶體佈局仍需重新驗證。樣本 JSON 只在使用 `--demo` 或 `--data` 時需要。
 
-本專案的單檔發佈版可由上方下載連結取得；倉庫中的檔案位於 [`dist/mcp_esp_overlay.exe`](dist/mcp_esp_overlay.exe)。應用程式設定檔和 ImGui 視窗位置檔會在執行時建立，不應上傳。
+正式發佈檔統一在 [GitHub Releases](https://github.com/infycat/MiniWorldEsp/releases) 管理；`dist/mcp_esp_overlay.exe` 是目前源碼樹的建置產物。應用程式設定檔和 ImGui 視窗位置檔會在執行時建立，不應上傳。
 
 ## 快照格式
 
