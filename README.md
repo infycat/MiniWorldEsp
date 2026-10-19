@@ -14,7 +14,7 @@
 
 [⬇️ 前往 GitHub Releases 下載最新版](https://github.com/infycat/MiniWorldEsp/releases/latest)
 
-GitHub 會自動把此連結導向最新正式版本；在 Releases 頁面可查看版本說明、歷史版本及 `SHA256SUMS.txt` 完整性校驗檔。若想在更新時收到通知，可於倉庫右上角選擇 **Watch → Custom → Releases**。
+GitHub 會自動把此連結導向最新正式版本；在 Releases 頁面可查看版本說明、歷史版本及 `mcp_esp_overlay.exe.sha256` 完整性校驗檔。若想在更新時收到通知，可於倉庫右上角選擇 **Watch → Custom → Releases**。
 
 下載 `mcp_esp_overlay.exe` 後直接開啟，在啟動控制台按「開啟 ESP」即可使用。想自行編譯或查看程式內容，可參考下方原始碼與[編譯指南](docs/GETTING_STARTED.md)。
 
